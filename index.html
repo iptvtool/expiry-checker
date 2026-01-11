@@ -132,6 +132,7 @@
     }
     .ok{ color:#0aa07a; font-weight:800; }
     .bad{ color:#d24545; font-weight:800; }
+    .warn{ color:#c78a00; font-weight:800; }
 
     .hint{
       color:var(--muted);
@@ -238,10 +239,37 @@
       await navigator.clipboard.writeText(text);
       setOutputText("Copied result to clipboard.\n\n" + text);
     } catch(e) {
-      // Clipboard API can be blocked; fallback to selection approach
       setOutputText("Could not access clipboard. Please select and copy manually.\n\n" + text);
     }
   });
+
+  function connMessage(activeCons, maxCons){
+    // Returns { html, text }
+    if (activeCons === null || maxCons === null) {
+      return {
+        html: "<b>Connections:</b> Unknown (provider did not supply connection limits)<br>",
+        text: "Connections: Unknown (provider did not supply connection limits)\n"
+      };
+    }
+
+    var a = parseInt(activeCons, 10);
+    var m = parseInt(maxCons, 10);
+
+    if (!isFinite(a) || !isFinite(m)) {
+      return {
+        html: "<b>Connections:</b> Unknown (invalid values)<br>",
+        text: "Connections: Unknown (invalid values)\n"
+      };
+    }
+
+    var reached = (m > 0 && a >= m);
+    var statusHtml = reached ? '<span class="warn">LIMIT REACHED</span>' : '<span class="ok">OK</span>';
+
+    return {
+      html: "<b>Connections:</b> " + a + " active / " + m + " max — " + statusHtml + "<br>",
+      text: "Connections: " + a + " active / " + m + " max — " + (reached ? "LIMIT REACHED" : "OK") + "\n"
+    };
+  }
 
   async function check(){
     btn.disabled = true;
@@ -283,10 +311,15 @@
         return;
       }
 
-      // Expects data.user_info.exp_date
+      // Expects data.user_info.exp_date etc.
       var ui = (data && data.user_info) ? data.user_info : null;
+
       var exp = (ui && ui.exp_date) ? ui.exp_date : null;
       var status = (ui && ui.status) ? ui.status : "Unknown";
+
+      // New: concurrent connection fields (provider-dependent)
+      var activeCons = (ui && ui.active_cons !== undefined) ? ui.active_cons : null;
+      var maxCons = (ui && ui.max_connections !== undefined) ? ui.max_connections : null;
 
       if (!exp || exp === "0"){
         setOutputText("Could not find user_info.exp_date in response.\n\n" + text.slice(0, 600));
@@ -302,17 +335,29 @@
       var days = Math.floor((expiryDate.getTime() - Date.now()) / 86400000);
       var active = days >= 0;
 
+      var conn = connMessage(activeCons, maxCons);
+
       var plain =
         "Status: " + (active ? "ACTIVE" : "EXPIRED") + "\n" +
         "API status: " + status + "\n" +
+        conn.text +
         "Expiry date: " + expiryDate.toLocaleString() + "\n" +
         "Days remaining: " + days;
 
       var html =
         "<b>Status:</b> " + (active ? '<span class="ok">ACTIVE</span>' : '<span class="bad">EXPIRED</span>') + "<br>" +
         "<b>API status:</b> " + status + "<br>" +
+        conn.html +
         "<b>Expiry date:</b> " + expiryDate.toLocaleString() + "<br>" +
         "<b>Days remaining:</b> " + days;
+
+      // Additional nudge if limit reached (only when we know)
+      var a = parseInt(activeCons, 10);
+      var m = parseInt(maxCons, 10);
+      if (isFinite(a) && isFinite(m) && m > 0 && a >= m) {
+        html += "<br><b>Note:</b> If streams are failing, a connection limit may be blocking additional devices.";
+        plain += "\n\nNote: If streams are failing, a connection limit may be blocking additional devices.";
+      }
 
       setOutputHTML(html, plain);
 
@@ -332,4 +377,5 @@
 
 </body>
 </html>
+
 
