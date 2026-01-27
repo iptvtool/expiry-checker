@@ -90,6 +90,39 @@
       font-size:16px;
       box-sizing:border-box;
     }
+
+    /* Scheme toggle */
+    .schemeRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:14px;
+    }
+    .schemeLabel{
+      font-weight:600;
+      font-size:14px;
+      margin:0;
+    }
+    .schemeGroup{
+      display:inline-flex;
+      border:1px solid var(--border);
+      border-radius:10px;
+      overflow:hidden;
+    }
+    .schemeBtn{
+      padding:8px 12px;
+      background:transparent;
+      color:var(--text);
+      border:0;
+      cursor:pointer;
+      font-size:13px;
+    }
+    .schemeBtn.active{
+      background:var(--btn);
+      color:var(--btnText);
+    }
+
     .btnrow{
       display:flex;
       gap:10px;
@@ -152,8 +185,15 @@
       <button id="themeBtn" class="toggle" type="button" aria-label="Toggle dark mode">Dark mode</button>
     </div>
 
-    <label>Server URL (HTTPS only)</label>
-    <input id="server" placeholder="https://example.com" value="https://cf.1575-cdn.me" autocomplete="url">
+    <div class="schemeRow">
+      <div class="schemeLabel">Server URL</div>
+      <div class="schemeGroup" role="group" aria-label="Scheme toggle">
+        <button id="httpsBtn" class="schemeBtn active" type="button">HTTPS</button>
+        <button id="httpBtn" class="schemeBtn" type="button">HTTP</button>
+      </div>
+    </div>
+
+    <input id="server" placeholder="cf.example.com" value="cf.1575-cdn.me" autocomplete="url">
 
     <label>Username</label>
     <input id="username" placeholder="username" autocomplete="username">
@@ -169,7 +209,7 @@
 
     <div id="output" class="result">Ready.</div>
     <div class="hint">
-      If you get a “fetch failed / CORS” error, the IPTV server is blocking browser requests. (Your account may still be active.)
+      Tip: HTTPS is safer. If your provider only works on HTTP, switch it using the toggle above.
     </div>
   </div>
 
@@ -181,9 +221,57 @@
   var resetBtn = document.getElementById("resetBtn");
   var themeBtn = document.getElementById("themeBtn");
 
+  var httpsBtn = document.getElementById("httpsBtn");
+  var httpBtn  = document.getElementById("httpBtn");
+  var serverInput = document.getElementById("server");
+
   var lastResultText = "";
+  var scheme = "https"; // default
 
   function trim(v){ return (v || "").trim(); }
+
+  function setScheme(newScheme){
+    scheme = newScheme === "http" ? "http" : "https";
+    httpsBtn.classList.toggle("active", scheme === "https");
+    httpBtn.classList.toggle("active", scheme === "http");
+  }
+
+  httpsBtn.addEventListener("click", function(){ setScheme("https"); });
+  httpBtn.addEventListener("click", function(){ setScheme("http"); });
+
+  function stripSchemeAndPath(v){
+    // Accept full URLs and reduce to host[:port] (keep port)
+    v = trim(v);
+    if (!v) return "";
+
+    // If pasted with scheme, update toggle
+    if (v.toLowerCase().startsWith("http://")) {
+      setScheme("http");
+      v = v.slice(7);
+    } else if (v.toLowerCase().startsWith("https://")) {
+      setScheme("https");
+      v = v.slice(8);
+    }
+
+    // Remove everything after first slash (path/query)
+    var slash = v.indexOf("/");
+    if (slash !== -1) v = v.slice(0, slash);
+
+    // Remove trailing slashes just in case
+    v = v.replace(/\/+$/, "");
+
+    return v;
+  }
+
+  // Normalise server field on paste/blur: allow pasting full URL
+  serverInput.addEventListener("paste", function(){
+    setTimeout(function(){
+      serverInput.value = stripSchemeAndPath(serverInput.value);
+    }, 0);
+  });
+  serverInput.addEventListener("blur", function(){
+    serverInput.value = stripSchemeAndPath(serverInput.value);
+  });
 
   function setOutputText(t){
     lastResultText = t;
@@ -225,7 +313,8 @@
   });
 
   resetBtn.addEventListener("click", function(){
-    document.getElementById("server").value = "https://cf.1575-cdn.me";
+    setScheme("https");
+    serverInput.value = "cf.1575-cdn.me";
     document.getElementById("username").value = "";
     document.getElementById("password").value = "";
     setOutputText("Ready.");
@@ -244,7 +333,6 @@
   });
 
   function connMessage(activeCons, maxCons){
-    // Returns { html, text }
     if (activeCons === null || maxCons === null) {
       return {
         html: "<b>Connections:</b> Unknown (provider did not supply connection limits)<br>",
@@ -276,22 +364,19 @@
     setOutputText("Checking…");
 
     try {
-      var server = trim(document.getElementById("server").value).replace(/\/+$/, "");
+      var host = stripSchemeAndPath(serverInput.value);
+      serverInput.value = host; // keep it clean
       var user = trim(document.getElementById("username").value);
       var pass = trim(document.getElementById("password").value);
 
-      if (!server || !user || !pass){
-        setOutputText("Please fill in Server URL, Username and Password.");
+      if (!host || !user || !pass){
+        setOutputText("Please fill in Server, Username and Password.");
         return;
       }
 
-      // HTTPS-only validation
-      if (server.slice(0, 8).toLowerCase() !== "https://"){
-        setOutputText("Please use an HTTPS server URL (must start with https://).");
-        return;
-      }
+      var base = scheme + "://" + host;
 
-      var url = server + "/player_api.php?username=" + encodeURIComponent(user) +
+      var url = base + "/player_api.php?username=" + encodeURIComponent(user) +
                 "&password=" + encodeURIComponent(pass) + "&_=" + Date.now();
 
       var res = await fetch(url, { method: "GET", cache: "no-store" });
@@ -311,13 +396,11 @@
         return;
       }
 
-      // Expects data.user_info.exp_date etc.
       var ui = (data && data.user_info) ? data.user_info : null;
 
       var exp = (ui && ui.exp_date) ? ui.exp_date : null;
       var status = (ui && ui.status) ? ui.status : "Unknown";
 
-      // New: concurrent connection fields (provider-dependent)
       var activeCons = (ui && ui.active_cons !== undefined) ? ui.active_cons : null;
       var maxCons = (ui && ui.max_connections !== undefined) ? ui.max_connections : null;
 
@@ -340,6 +423,8 @@
       var plain =
         "Status: " + (active ? "ACTIVE" : "EXPIRED") + "\n" +
         "API status: " + status + "\n" +
+        "Scheme used: " + scheme.toUpperCase() + "\n" +
+        "Server: " + host + "\n" +
         conn.text +
         "Expiry date: " + expiryDate.toLocaleString() + "\n" +
         "Days remaining: " + days;
@@ -347,11 +432,12 @@
       var html =
         "<b>Status:</b> " + (active ? '<span class="ok">ACTIVE</span>' : '<span class="bad">EXPIRED</span>') + "<br>" +
         "<b>API status:</b> " + status + "<br>" +
+        "<b>Scheme used:</b> " + scheme.toUpperCase() + "<br>" +
+        "<b>Server:</b> " + host + "<br>" +
         conn.html +
         "<b>Expiry date:</b> " + expiryDate.toLocaleString() + "<br>" +
         "<b>Days remaining:</b> " + days;
 
-      // Additional nudge if limit reached (only when we know)
       var a = parseInt(activeCons, 10);
       var m = parseInt(maxCons, 10);
       if (isFinite(a) && isFinite(m) && m > 0 && a >= m) {
@@ -364,7 +450,7 @@
     } catch(e) {
       setOutputText(
         "Error: " + (e && e.message ? e.message : String(e)) + "\n\n" +
-        "Most common cause: the IPTV server blocks browser requests (CORS)."
+        "Most common cause: the IPTV server blocks browser requests (CORS), or the chosen scheme is not supported."
       );
     } finally {
       btn.disabled = false;
