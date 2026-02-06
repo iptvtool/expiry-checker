@@ -7,171 +7,31 @@
 
   <style>
     :root{
-      --bg:#f7f7f7;
-      --card:#ffffff;
-      --text:#111111;
-      --muted:#666666;
-      --border:#cccccc;
-      --btn:#111111;
-      --btnText:#ffffff;
-      --resultBg:#f0f0f0;
-      --shadow:0 4px 14px rgba(0,0,0,0.08);
+      --bg:#f7f7f7; --card:#ffffff; --text:#111111; --muted:#666666; --border:#cccccc;
+      --btn:#111111; --btnText:#ffffff; --resultBg:#f0f0f0; --shadow:0 4px 14px rgba(0,0,0,0.08);
     }
     body.dark{
-      --bg:#0f1115;
-      --card:#171a21;
-      --text:#f1f3f5;
-      --muted:#a9b0bb;
-      --border:#2b303a;
-      --btn:#f1f3f5;
-      --btnText:#111111;
-      --resultBg:#11141a;
-      --shadow:0 8px 22px rgba(0,0,0,0.40);
+      --bg:#0f1115; --card:#171a21; --text:#f1f3f5; --muted:#a9b0bb; --border:#2b303a;
+      --btn:#f1f3f5; --btnText:#111111; --resultBg:#11141a; --shadow:0 8px 22px rgba(0,0,0,0.40);
     }
-
-    body{
-      font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      margin:0;
-      padding:20px;
-      display:flex;
-      justify-content:center;
-    }
-    .card{
-      background:var(--card);
-      padding:22px;
-      max-width:560px;
-      width:100%;
-      border-radius:12px;
-      box-shadow:var(--shadow);
-    }
-    .topbar{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-    }
-    h1{
-      margin:0 0 6px;
-      font-size:22px;
-      line-height:1.2;
-    }
-    .disclaimer{
-      margin:0;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.35;
-    }
-    .toggle{
-      border:1px solid var(--border);
-      background:transparent;
-      color:var(--text);
-      padding:8px 10px;
-      border-radius:10px;
-      cursor:pointer;
-      font-size:13px;
-      white-space:nowrap;
-    }
-    label{
-      display:block;
-      margin-top:14px;
-      font-weight:600;
-      font-size:14px;
-    }
-    input{
-      width:100%;
-      padding:10px;
-      margin-top:6px;
-      border-radius:10px;
-      border:1px solid var(--border);
-      background:transparent;
-      color:var(--text);
-      font-size:16px;
-      box-sizing:border-box;
-    }
-
-    /* Scheme toggle */
-    .schemeRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-top:14px;
-    }
-    .schemeLabel{
-      font-weight:600;
-      font-size:14px;
-      margin:0;
-    }
-    .schemeGroup{
-      display:inline-flex;
-      border:1px solid var(--border);
-      border-radius:10px;
-      overflow:hidden;
-    }
-    .schemeBtn{
-      padding:8px 12px;
-      background:transparent;
-      color:var(--text);
-      border:0;
-      cursor:pointer;
-      font-size:13px;
-    }
-    .schemeBtn.active{
-      background:var(--btn);
-      color:var(--btnText);
-    }
-
-    .btnrow{
-      display:flex;
-      gap:10px;
-      margin-top:16px;
-      flex-wrap:wrap;
-    }
-    button.primary{
-      flex: 1 1 220px;
-      padding:12px;
-      background:var(--btn);
-      color:var(--btnText);
-      border:none;
-      border-radius:10px;
-      font-size:16px;
-      cursor:pointer;
-    }
-    button.secondary{
-      flex: 1 1 140px;
-      padding:12px;
-      background:transparent;
-      color:var(--text);
-      border:1px solid var(--border);
-      border-radius:10px;
-      font-size:14px;
-      cursor:pointer;
-    }
-    button:disabled{
-      opacity:.6;
-      cursor:not-allowed;
-    }
-    .result{
-      margin-top:16px;
-      padding:12px;
-      border-radius:10px;
-      background:var(--resultBg);
-      border:1px solid var(--border);
-      white-space:pre-wrap;
-      font-size:14px;
-      min-height:52px;
-    }
-    .ok{ color:#0aa07a; font-weight:800; }
-    .bad{ color:#d24545; font-weight:800; }
-    .warn{ color:#c78a00; font-weight:800; }
-
-    .hint{
-      color:var(--muted);
-      font-size:12px;
-      margin-top:10px;
-    }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px;display:flex;justify-content:center}
+    .card{background:var(--card);padding:22px;max-width:560px;width:100%;border-radius:12px;box-shadow:var(--shadow)}
+    .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    h1{margin:0 0 6px;font-size:22px;line-height:1.2}
+    .disclaimer{margin:0;color:var(--muted);font-size:12px;line-height:1.35}
+    .toggle{border:1px solid var(--border);background:transparent;color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer;font-size:13px;white-space:nowrap}
+    label{display:block;margin-top:14px;font-weight:600;font-size:14px}
+    input{width:100%;padding:10px;margin-top:6px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:16px;box-sizing:border-box}
+    .btnrow{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+    button.primary{flex:1 1 220px;padding:12px;background:var(--btn);color:var(--btnText);border:none;border-radius:10px;font-size:16px;cursor:pointer}
+    button.secondary{flex:1 1 140px;padding:12px;background:transparent;color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:14px;cursor:pointer}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .result{margin-top:16px;padding:12px;border-radius:10px;background:var(--resultBg);border:1px solid var(--border);white-space:pre-wrap;font-size:14px;min-height:52px}
+    .ok{color:#0aa07a;font-weight:800}
+    .bad{color:#d24545;font-weight:800}
+    .warn{color:#c78a00;font-weight:800}
+    .hint{color:var(--muted);font-size:12px;margin-top:10px}
+    .notice{color:#0aa07a;font-size:12px;margin-top:6px;display:none}
   </style>
 </head>
 
@@ -182,18 +42,12 @@
         <h1>Expiry Checker</h1>
         <p class="disclaimer">Runs in your browser only. Nothing is stored or sent anywhere except to the IPTV server you enter.</p>
       </div>
-      <button id="themeBtn" class="toggle" type="button" aria-label="Toggle dark mode">Dark mode</button>
+      <button id="themeBtn" class="toggle" type="button">Dark mode</button>
     </div>
 
-    <div class="schemeRow">
-      <div class="schemeLabel">Server URL</div>
-      <div class="schemeGroup" role="group" aria-label="Scheme toggle">
-        <button id="httpsBtn" class="schemeBtn active" type="button">HTTPS</button>
-        <button id="httpBtn" class="schemeBtn" type="button">HTTP</button>
-      </div>
-    </div>
-
-    <input id="server" placeholder="cf.example.com" value="cf.1575-cdn.me" autocomplete="url">
+    <label>Server URL</label>
+    <input id="server" placeholder="cf.example.com" value="https://cf.1575-cdn.me" autocomplete="url">
+    <div id="notice" class="notice">Switched to HTTPS for browser compatibility.</div>
 
     <label>Username</label>
     <input id="username" placeholder="username" autocomplete="username">
@@ -209,7 +63,7 @@
 
     <div id="output" class="result">Ready.</div>
     <div class="hint">
-      Tip: HTTPS is safer. If your provider only works on HTTP, switch it using the toggle above.
+      Note: If a provider is truly HTTP-only, a GitHub Pages site can’t query it in-page due to browser security rules.
     </div>
   </div>
 
@@ -220,68 +74,50 @@
   var copyBtn = document.getElementById("copyBtn");
   var resetBtn = document.getElementById("resetBtn");
   var themeBtn = document.getElementById("themeBtn");
-
-  var httpsBtn = document.getElementById("httpsBtn");
-  var httpBtn  = document.getElementById("httpBtn");
   var serverInput = document.getElementById("server");
+  var notice = document.getElementById("notice");
 
   var lastResultText = "";
-  var scheme = "https"; // default
 
   function trim(v){ return (v || "").trim(); }
-
-  function setScheme(newScheme){
-    scheme = newScheme === "http" ? "http" : "https";
-    httpsBtn.classList.toggle("active", scheme === "https");
-    httpBtn.classList.toggle("active", scheme === "http");
+  function showNotice(){
+    notice.style.display = "block";
+    setTimeout(function(){ notice.style.display = "none"; }, 2000);
   }
 
-  httpsBtn.addEventListener("click", function(){ setScheme("https"); });
-  httpBtn.addEventListener("click", function(){ setScheme("http"); });
-
-  function stripSchemeAndPath(v){
-    // Accept full URLs and reduce to host[:port] (keep port)
-    v = trim(v);
+  function normalizeToHttps(input){
+    var v = trim(input);
     if (!v) return "";
 
-    // If pasted with scheme, update toggle
-    if (v.toLowerCase().startsWith("http://")) {
-      setScheme("http");
+    var lower = v.toLowerCase();
+
+    // Strip scheme if present
+    if (lower.startsWith("http://")) {
       v = v.slice(7);
-    } else if (v.toLowerCase().startsWith("https://")) {
-      setScheme("https");
+      showNotice();
+    } else if (lower.startsWith("https://")) {
       v = v.slice(8);
+    } else {
+      // bare host — still force https
     }
 
-    // Remove everything after first slash (path/query)
+    // Strip path/query
     var slash = v.indexOf("/");
     if (slash !== -1) v = v.slice(0, slash);
 
-    // Remove trailing slashes just in case
     v = v.replace(/\/+$/, "");
-
-    return v;
+    return "https://" + v;
   }
 
-  // Normalise server field on paste/blur: allow pasting full URL
   serverInput.addEventListener("paste", function(){
-    setTimeout(function(){
-      serverInput.value = stripSchemeAndPath(serverInput.value);
-    }, 0);
+    setTimeout(function(){ serverInput.value = normalizeToHttps(serverInput.value); }, 0);
   });
   serverInput.addEventListener("blur", function(){
-    serverInput.value = stripSchemeAndPath(serverInput.value);
+    serverInput.value = normalizeToHttps(serverInput.value);
   });
 
-  function setOutputText(t){
-    lastResultText = t;
-    out.textContent = t;
-  }
-
-  function setOutputHTML(html, plainTextFallback){
-    lastResultText = plainTextFallback || "";
-    out.innerHTML = html;
-  }
+  function setOutputText(t){ lastResultText = t; out.textContent = t; }
+  function setOutputHTML(html, plain){ lastResultText = plain || ""; out.innerHTML = html; }
 
   function unixToLocal(secStr){
     var n = parseInt(secStr, 10);
@@ -296,16 +132,7 @@
     else document.body.classList.remove("dark");
     themeBtn.textContent = document.body.classList.contains("dark") ? "Light mode" : "Dark mode";
   }
-
-  // Load theme
-  try {
-    var saved = localStorage.getItem("expiry_checker_theme");
-    if (saved) applyTheme(saved);
-    else applyTheme("light");
-  } catch(e) {
-    applyTheme("light");
-  }
-
+  try { applyTheme(localStorage.getItem("expiry_checker_theme") || "light"); } catch(e){ applyTheme("light"); }
   themeBtn.addEventListener("click", function(){
     var nowDark = !document.body.classList.contains("dark");
     applyTheme(nowDark ? "dark" : "light");
@@ -313,16 +140,14 @@
   });
 
   resetBtn.addEventListener("click", function(){
-    setScheme("https");
-    serverInput.value = "cf.1575-cdn.me";
+    serverInput.value = "https://cf.1575-cdn.me";
     document.getElementById("username").value = "";
     document.getElementById("password").value = "";
     setOutputText("Ready.");
   });
 
   copyBtn.addEventListener("click", async function(){
-    var text = lastResultText || out.textContent || "";
-    text = trim(text);
+    var text = trim(lastResultText || out.textContent || "");
     if (!text) text = "No result to copy.";
     try {
       await navigator.clipboard.writeText(text);
@@ -334,25 +159,14 @@
 
   function connMessage(activeCons, maxCons){
     if (activeCons === null || maxCons === null) {
-      return {
-        html: "<b>Connections:</b> Unknown (provider did not supply connection limits)<br>",
-        text: "Connections: Unknown (provider did not supply connection limits)\n"
-      };
+      return { html:"<b>Connections:</b> Unknown<br>", text:"Connections: Unknown\n" };
     }
-
-    var a = parseInt(activeCons, 10);
-    var m = parseInt(maxCons, 10);
-
+    var a = parseInt(activeCons, 10), m = parseInt(maxCons, 10);
     if (!isFinite(a) || !isFinite(m)) {
-      return {
-        html: "<b>Connections:</b> Unknown (invalid values)<br>",
-        text: "Connections: Unknown (invalid values)\n"
-      };
+      return { html:"<b>Connections:</b> Unknown<br>", text:"Connections: Unknown\n" };
     }
-
     var reached = (m > 0 && a >= m);
     var statusHtml = reached ? '<span class="warn">LIMIT REACHED</span>' : '<span class="ok">OK</span>';
-
     return {
       html: "<b>Connections:</b> " + a + " active / " + m + " max — " + statusHtml + "<br>",
       text: "Connections: " + a + " active / " + m + " max — " + (reached ? "LIMIT REACHED" : "OK") + "\n"
@@ -364,19 +178,20 @@
     setOutputText("Checking…");
 
     try {
-      var host = stripSchemeAndPath(serverInput.value);
-      serverInput.value = host; // keep it clean
+      var server = normalizeToHttps(serverInput.value);
+      serverInput.value = server;
+
       var user = trim(document.getElementById("username").value);
       var pass = trim(document.getElementById("password").value);
 
-      if (!host || !user || !pass){
-        setOutputText("Please fill in Server, Username and Password.");
+      if (!server || !user || !pass){
+        setOutputText("Please fill in Server URL, Username and Password.");
         return;
       }
 
-      var base = scheme + "://" + host;
+      server = server.replace(/\/+$/, "");
 
-      var url = base + "/player_api.php?username=" + encodeURIComponent(user) +
+      var url = server + "/player_api.php?username=" + encodeURIComponent(user) +
                 "&password=" + encodeURIComponent(pass) + "&_=" + Date.now();
 
       var res = await fetch(url, { method: "GET", cache: "no-store" });
@@ -397,10 +212,8 @@
       }
 
       var ui = (data && data.user_info) ? data.user_info : null;
-
       var exp = (ui && ui.exp_date) ? ui.exp_date : null;
       var status = (ui && ui.status) ? ui.status : "Unknown";
-
       var activeCons = (ui && ui.active_cons !== undefined) ? ui.active_cons : null;
       var maxCons = (ui && ui.max_connections !== undefined) ? ui.max_connections : null;
 
@@ -417,14 +230,12 @@
 
       var days = Math.floor((expiryDate.getTime() - Date.now()) / 86400000);
       var active = days >= 0;
-
       var conn = connMessage(activeCons, maxCons);
 
       var plain =
         "Status: " + (active ? "ACTIVE" : "EXPIRED") + "\n" +
         "API status: " + status + "\n" +
-        "Scheme used: " + scheme.toUpperCase() + "\n" +
-        "Server: " + host + "\n" +
+        "Server used: " + server + "\n" +
         conn.text +
         "Expiry date: " + expiryDate.toLocaleString() + "\n" +
         "Days remaining: " + days;
@@ -432,25 +243,17 @@
       var html =
         "<b>Status:</b> " + (active ? '<span class="ok">ACTIVE</span>' : '<span class="bad">EXPIRED</span>') + "<br>" +
         "<b>API status:</b> " + status + "<br>" +
-        "<b>Scheme used:</b> " + scheme.toUpperCase() + "<br>" +
-        "<b>Server:</b> " + host + "<br>" +
+        "<b>Server used:</b> " + server + "<br>" +
         conn.html +
         "<b>Expiry date:</b> " + expiryDate.toLocaleString() + "<br>" +
         "<b>Days remaining:</b> " + days;
-
-      var a = parseInt(activeCons, 10);
-      var m = parseInt(maxCons, 10);
-      if (isFinite(a) && isFinite(m) && m > 0 && a >= m) {
-        html += "<br><b>Note:</b> If streams are failing, a connection limit may be blocking additional devices.";
-        plain += "\n\nNote: If streams are failing, a connection limit may be blocking additional devices.";
-      }
 
       setOutputHTML(html, plain);
 
     } catch(e) {
       setOutputText(
         "Error: " + (e && e.message ? e.message : String(e)) + "\n\n" +
-        "Most common cause: the IPTV server blocks browser requests (CORS), or the chosen scheme is not supported."
+        "If this server is HTTP-only, the browser will block it from this HTTPS site. Try an HTTPS CDN/domain."
       );
     } finally {
       btn.disabled = false;
