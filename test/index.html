@@ -19,44 +19,43 @@ body.dark{
 
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px;display:flex;justify-content:center}
 .card{background:var(--card);padding:22px;max-width:640px;width:100%;border-radius:12px;box-shadow:var(--shadow)}
-.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-h1{margin:0 0 6px;font-size:22px}
-.disclaimer{margin:0;color:var(--muted);font-size:12px}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between}
 .toggle{border:1px solid var(--border);background:transparent;color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer}
 
 label{display:block;margin-top:14px;font-weight:600}
-input, textarea{
+input,textarea{
 width:100%;padding:10px;margin-top:6px;border-radius:10px;border:1px solid var(--border);
 background:transparent;color:var(--text);box-sizing:border-box
 }
-textarea{min-height:120px;font-family:monospace;font-size:13px}
+textarea{min-height:120px;font-family:monospace}
 
-.btnrow{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.btnrow{display:flex;gap:10px;margin-top:16px}
 button.primary{flex:1;padding:12px;background:var(--btn);color:var(--btnText);border:none;border-radius:10px;cursor:pointer}
 button.secondary{flex:1;padding:12px;background:transparent;color:var(--text);border:1px solid var(--border);border-radius:10px;cursor:pointer}
+
 .result{margin-top:16px;padding:12px;border-radius:10px;background:var(--resultBg);border:1px solid var(--border);white-space:pre-wrap}
 .ok{color:#0aa07a;font-weight:800}
 .bad{color:#d24545;font-weight:800}
 .warn{color:#c78a00;font-weight:800}
 
 .panel{margin-top:16px;padding:12px;border-radius:10px;background:var(--warnBg);border:1px solid var(--warnBorder);display:none}
-.small{font-size:12px;color:var(--muted)}
 .hint{font-size:12px;color:var(--muted);margin-top:10px}
 </style>
 </head>
 
 <body>
 <div class="card">
+
 <div class="topbar">
 <div>
 <h1>Expiry Checker</h1>
-<p class="disclaimer">Runs in your browser only. Nothing is stored.</p>
+<p class="hint">Runs in your browser only. Nothing is stored.</p>
 </div>
 <button id="themeBtn" class="toggle">Dark mode</button>
 </div>
 
 <label>Server URL</label>
-<input id="server" placeholder="cf.example.com" value="cf.1575-cdn.me">
+<input id="server" placeholder="cf.example.com">
 
 <label>Username</label>
 <input id="username">
@@ -81,22 +80,17 @@ button.secondary{flex:1;padding:12px;background:transparent;color:var(--text);bo
 
 <label>Paste JSON here</label>
 <textarea id="jsonPaste"></textarea>
-
 <button id="parseBtn" class="primary">Parse JSON</button>
 </div>
 
-<div class="hint">
-If check fails, open API and paste JSON.
-</div>
-
-<div class="hint" style="text-align:center;margin-top:18px;">
-ver: 06-02-26
-</div>
+<div class="hint">If check fails, open API and paste JSON.</div>
+<div class="hint" style="text-align:center;margin-top:18px;">ver: 06-02-26</div>
 
 </div>
 
 <script>
 (function(){
+
 const out=document.getElementById("output");
 const fallback=document.getElementById("fallback");
 const fallbackMsg=document.getElementById("fallbackMsg");
@@ -129,15 +123,15 @@ navigator.clipboard.writeText(lastText||out.textContent);
 };
 
 document.getElementById("resetBtn").onclick=()=>{
-server.value="cf.1575-cdn.me";username.value="";password.value="";
+server.value="";username.value="";password.value="";
 text("Ready.");fallback.style.display="none";
 };
 
 document.getElementById("openHttpsBtn").onclick=()=>{
-window.open(api("https",lastHost,lastUser,lastPass),"_blank");
+window.open(api("https",lastHost,lastUser,lastPass));
 };
 document.getElementById("openHttpBtn").onclick=()=>{
-window.open(api("http",lastHost,lastUser,lastPass),"_blank");
+window.open(api("http",lastHost,lastUser,lastPass));
 };
 
 function render(d){
@@ -146,6 +140,7 @@ const ex=unix(ui.exp_date);
 if(!ex){text("No expiry found");return;}
 const days=Math.floor((ex-Date.now())/86400000);
 const ok=days>=0;
+
 show(
 `<b>Status:</b> <span class="${ok?"ok":"bad"}">${ok?"ACTIVE":"EXPIRED"}</span><br>
 <b>Expiry:</b> ${ex.toLocaleString()}<br>
@@ -156,26 +151,62 @@ show(
 
 document.getElementById("parseBtn").onclick=()=>{
 try{render(JSON.parse(jsonPaste.value));}
-catch{ text("Invalid JSON");}
+catch{text("Invalid JSON");}
 };
 
 document.getElementById("checkBtn").onclick=async()=>{
 fallback.style.display="none";
-const h=host(server.value);
+
+const raw=server.value.trim();
 const u=trim(username.value);
 const p=trim(password.value);
 
-if(!h||!u||!p){text("Fill all fields");return;}
+if(!raw||!u||!p){text("Fill all fields");return;}
 
-lastHost=h;lastUser=u;lastPass=p;
+let scheme=null;
+let h=raw;
+
+if(raw.startsWith("http://")){
+scheme="http";
+h=raw.replace(/^http:\/\//,"");
+}
+else if(raw.startsWith("https://")){
+scheme="https";
+h=raw.replace(/^https:\/\//,"");
+}
+
+h=h.split("/")[0];
+
+lastHost=h; lastUser=u; lastPass=p;
+
+async function tryFetch(s){
+const r=await fetch(api(s,h,u,p));
+const t=await r.text();
+return JSON.parse(t);
+}
 
 try{
-const r=await fetch(api("https",h,u,p));
-const t=await r.text();
-render(JSON.parse(t));
+let data;
+
+if(scheme){
+data=await tryFetch(scheme);
+render(data);
+return;
+}
+
+try{
+data=await tryFetch("https");
+render(data);
+return;
+}catch{
+data=await tryFetch("http");
+render(data);
+return;
+}
+
 }catch(e){
 fallback.style.display="block";
-fallbackMsg.textContent="Browser blocked direct check.";
+fallbackMsg.textContent="Server blocked browser or returned invalid data.";
 text("Direct check failed. Use fallback.");
 }
 };
