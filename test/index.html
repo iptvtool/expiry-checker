@@ -1,388 +1,187 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Expiry Checker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<title>Expiry Checker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    :root{
-      --bg:#f7f7f7; --card:#ffffff; --text:#111111; --muted:#666666; --border:#cccccc;
-      --btn:#111111; --btnText:#ffffff; --resultBg:#f0f0f0; --shadow:0 4px 14px rgba(0,0,0,0.08);
-      --warnBg:#fff6e5; --warnBorder:#f1d18b;
-    }
-    body.dark{
-      --bg:#0f1115; --card:#171a21; --text:#f1f3f5; --muted:#a9b0bb; --border:#2b303a;
-      --btn:#f1f3f5; --btnText:#111111; --resultBg:#11141a; --shadow:0 8px 22px rgba(0,0,0,0.40);
-      --warnBg:#2a2517; --warnBorder:#6b5a2b;
-    }
+<style>
+:root{
+--bg:#f7f7f7; --card:#ffffff; --text:#111111; --muted:#666666; --border:#cccccc;
+--btn:#111111; --btnText:#ffffff; --resultBg:#f0f0f0; --shadow:0 4px 14px rgba(0,0,0,0.08);
+--warnBg:#fff6e5; --warnBorder:#f1d18b;
+}
+body.dark{
+--bg:#0f1115; --card:#171a21; --text:#f1f3f5; --muted:#a9b0bb; --border:#2b303a;
+--btn:#f1f3f5; --btnText:#111111; --resultBg:#11141a; --shadow:0 8px 22px rgba(0,0,0,0.40);
+--warnBg:#2a2517; --warnBorder:#6b5a2b;
+}
 
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px;display:flex;justify-content:center}
-    .card{background:var(--card);padding:22px;max-width:640px;width:100%;border-radius:12px;box-shadow:var(--shadow)}
-    .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-    h1{margin:0 0 6px;font-size:22px;line-height:1.2}
-    .disclaimer{margin:0;color:var(--muted);font-size:12px;line-height:1.35}
-    .toggle{border:1px solid var(--border);background:transparent;color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer;font-size:13px;white-space:nowrap}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px;display:flex;justify-content:center}
+.card{background:var(--card);padding:22px;max-width:640px;width:100%;border-radius:12px;box-shadow:var(--shadow)}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+h1{margin:0 0 6px;font-size:22px}
+.disclaimer{margin:0;color:var(--muted);font-size:12px}
+.toggle{border:1px solid var(--border);background:transparent;color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer}
 
-    label{display:block;margin-top:14px;font-weight:600;font-size:14px}
-    input, textarea{
-      width:100%;padding:10px;margin-top:6px;border-radius:10px;border:1px solid var(--border);
-      background:transparent;color:var(--text);font-size:16px;box-sizing:border-box
-    }
-    textarea{min-height:120px;font-size:13px;line-height:1.35;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+label{display:block;margin-top:14px;font-weight:600}
+input, textarea{
+width:100%;padding:10px;margin-top:6px;border-radius:10px;border:1px solid var(--border);
+background:transparent;color:var(--text);box-sizing:border-box
+}
+textarea{min-height:120px;font-family:monospace;font-size:13px}
 
-    .btnrow{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
-    button.primary{flex:1 1 220px;padding:12px;background:var(--btn);color:var(--btnText);border:none;border-radius:10px;font-size:16px;cursor:pointer}
-    button.secondary{flex:1 1 160px;padding:12px;background:transparent;color:var(--text);border:1px solid var(--border);border-radius:10px;font-size:14px;cursor:pointer}
-    button:disabled{opacity:.6;cursor:not-allowed}
+.btnrow{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+button.primary{flex:1;padding:12px;background:var(--btn);color:var(--btnText);border:none;border-radius:10px;cursor:pointer}
+button.secondary{flex:1;padding:12px;background:transparent;color:var(--text);border:1px solid var(--border);border-radius:10px;cursor:pointer}
+.result{margin-top:16px;padding:12px;border-radius:10px;background:var(--resultBg);border:1px solid var(--border);white-space:pre-wrap}
+.ok{color:#0aa07a;font-weight:800}
+.bad{color:#d24545;font-weight:800}
+.warn{color:#c78a00;font-weight:800}
 
-    .result{margin-top:16px;padding:12px;border-radius:10px;background:var(--resultBg);border:1px solid var(--border);white-space:pre-wrap;font-size:14px;min-height:52px}
-    .ok{color:#0aa07a;font-weight:800}
-    .bad{color:#d24545;font-weight:800}
-    .warn{color:#c78a00;font-weight:800}
-
-    .hint{color:var(--muted);font-size:12px;margin-top:10px}
-
-    .panel{
-      margin-top:16px;
-      padding:12px;
-      border-radius:10px;
-      background:var(--warnBg);
-      border:1px solid var(--warnBorder);
-      display:none;
-    }
-    .panelTitle{font-weight:700;margin:0 0 8px}
-    .panel p{margin:8px 0;color:var(--text);font-size:13px}
-    .small{color:var(--muted);font-size:12px}
-    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .row button{flex:1 1 220px}
-  </style>
+.panel{margin-top:16px;padding:12px;border-radius:10px;background:var(--warnBg);border:1px solid var(--warnBorder);display:none}
+.small{font-size:12px;color:var(--muted)}
+.hint{font-size:12px;color:var(--muted);margin-top:10px}
+</style>
 </head>
 
 <body>
-  <div class="card">
-    <div class="topbar">
-      <div>
-        <h1>Expiry Checker</h1>
-        <p class="disclaimer">Runs in your browser only. Nothing is stored by this page.</p>
-      </div>
-      <button id="themeBtn" class="toggle" type="button">Dark mode</button>
-    </div>
+<div class="card">
+<div class="topbar">
+<div>
+<h1>Expiry Checker</h1>
+<p class="disclaimer">Runs in your browser only. Nothing is stored.</p>
+</div>
+<button id="themeBtn" class="toggle">Dark mode</button>
+</div>
 
-    <label>Server URL</label>
-    <input id="server" placeholder="cf.example.com" value="cf.1575-cdn.me" autocomplete="url">
+<label>Server URL</label>
+<input id="server" placeholder="cf.example.com" value="cf.1575-cdn.me">
 
-    <label>Username</label>
-    <input id="username" placeholder="username" autocomplete="username">
+<label>Username</label>
+<input id="username">
 
-    <label>Password</label>
-    <input id="password" type="password" placeholder="password" autocomplete="current-password">
+<label>Password</label>
+<input id="password" type="password">
 
-    <div class="btnrow">
-      <button id="checkBtn" class="primary" type="button">Check expiry</button>
-      <button id="copyBtn" class="secondary" type="button">Copy result</button>
-      <button id="resetBtn" class="secondary" type="button">Reset</button>
-    </div>
+<div class="btnrow">
+<button id="checkBtn" class="primary">Check expiry</button>
+<button id="copyBtn" class="secondary">Copy result</button>
+<button id="resetBtn" class="secondary">Reset</button>
+</div>
 
-    <div id="output" class="result">Ready.</div>
+<div id="output" class="result">Ready.</div>
 
-    <!-- Fallback panel: shown when browser fetch is blocked -->
-    <div id="fallback" class="panel">
-      <div class="panelTitle">Can’t check directly from the browser</div>
-      <p id="fallbackMsg"></p>
+<div id="fallback" class="panel">
+<b>Direct check blocked</b>
+<p id="fallbackMsg"></p>
 
-      <div class="row">
-        <button id="openHttpsBtn" class="secondary" type="button">Open API URL (HTTPS)</button>
-        <button id="openHttpBtn" class="secondary" type="button">Open API URL (HTTP)</button>
-      </div>
+<button id="openHttpsBtn" class="secondary">Open API (HTTPS)</button>
+<button id="openHttpBtn" class="secondary">Open API (HTTP)</button>
 
-      <label style="margin-top:12px">Paste JSON response here (from the API tab)</label>
-      <textarea id="jsonPaste" placeholder='Paste the full JSON text from player_api.php here...'></textarea>
+<label>Paste JSON here</label>
+<textarea id="jsonPaste"></textarea>
 
-      <div class="row">
-        <button id="parseBtn" class="primary" type="button">Parse pasted JSON</button>
-        <button id="clearPasteBtn" class="secondary" type="button">Clear paste</button>
-      </div>
+<button id="parseBtn" class="primary">Parse JSON</button>
+</div>
 
-      <div class="small" style="margin-top:8px">
-        Tip: If the server is HTTP-only, your browser may block in-page checks from this HTTPS site.
-        Opening the API in a new tab and pasting the JSON here still lets you see the expiry.
-      </div>
-    </div>
+<div class="hint">
+If check fails, open API and paste JSON.
+</div>
 
-    <div class="hint">
-      If you get “Failed to fetch”, it’s often CORS/mixed-content blocking from the IPTV server or browser.
-    </div>
-  </div>
+<div class="hint" style="text-align:center;margin-top:18px;">
+ver: 06-02-26
+</div>
+
+</div>
 
 <script>
 (function(){
-  var out = document.getElementById("output");
-  var btn = document.getElementById("checkBtn");
-  var copyBtn = document.getElementById("copyBtn");
-  var resetBtn = document.getElementById("resetBtn");
-  var themeBtn = document.getElementById("themeBtn");
+const out=document.getElementById("output");
+const fallback=document.getElementById("fallback");
+const fallbackMsg=document.getElementById("fallbackMsg");
 
-  var fallback = document.getElementById("fallback");
-  var fallbackMsg = document.getElementById("fallbackMsg");
-  var openHttpsBtn = document.getElementById("openHttpsBtn");
-  var openHttpBtn = document.getElementById("openHttpBtn");
+let lastText="",lastHost="",lastUser="",lastPass="";
 
-  var jsonPaste = document.getElementById("jsonPaste");
-  var parseBtn = document.getElementById("parseBtn");
-  var clearPasteBtn = document.getElementById("clearPasteBtn");
+function trim(v){return(v||"").trim();}
+function host(v){
+v=trim(v).replace(/^https?:\/\//i,"");
+return v.split("/")[0];
+}
+function api(s,h,u,p){
+return s+"://"+h+"/player_api.php?username="+encodeURIComponent(u)+"&password="+encodeURIComponent(p);
+}
 
-  var lastResultText = "";
-  var lastBuiltHost = "";
-  var lastUser = "";
-  var lastPass = "";
+function unix(sec){
+const d=new Date(parseInt(sec,10)*1000);
+return isNaN(d)?null:d;
+}
 
-  function trim(v){ return (v || "").trim(); }
+function show(html,plain){lastText=plain;out.innerHTML=html;}
+function text(t){lastText=t;out.textContent=t;}
 
-  function setOutputText(t){ lastResultText = t; out.textContent = t; }
-  function setOutputHTML(html, plain){ lastResultText = plain || ""; out.innerHTML = html; }
+document.getElementById("themeBtn").onclick=()=>{
+document.body.classList.toggle("dark");
+};
 
-  function applyTheme(theme){
-    if (theme === "dark") document.body.classList.add("dark");
-    else document.body.classList.remove("dark");
-    themeBtn.textContent = document.body.classList.contains("dark") ? "Light mode" : "Dark mode";
-  }
+document.getElementById("copyBtn").onclick=()=>{
+navigator.clipboard.writeText(lastText||out.textContent);
+};
 
-  try { applyTheme(localStorage.getItem("expiry_checker_theme") || "light"); }
-  catch(e) { applyTheme("light"); }
+document.getElementById("resetBtn").onclick=()=>{
+server.value="cf.1575-cdn.me";username.value="";password.value="";
+text("Ready.");fallback.style.display="none";
+};
 
-  themeBtn.addEventListener("click", function(){
-    var nowDark = !document.body.classList.contains("dark");
-    applyTheme(nowDark ? "dark" : "light");
-    try { localStorage.setItem("expiry_checker_theme", nowDark ? "dark" : "light"); } catch(e) {}
-  });
+document.getElementById("openHttpsBtn").onclick=()=>{
+window.open(api("https",lastHost,lastUser,lastPass),"_blank");
+};
+document.getElementById("openHttpBtn").onclick=()=>{
+window.open(api("http",lastHost,lastUser,lastPass),"_blank");
+};
 
-  function unixToLocal(secStr){
-    var n = parseInt(secStr, 10);
-    if (!isFinite(n)) return null;
-    var d = new Date(n * 1000);
-    if (isNaN(d.getTime())) return null;
-    return d;
-  }
+function render(d){
+const ui=d.user_info||{};
+const ex=unix(ui.exp_date);
+if(!ex){text("No expiry found");return;}
+const days=Math.floor((ex-Date.now())/86400000);
+const ok=days>=0;
+show(
+`<b>Status:</b> <span class="${ok?"ok":"bad"}">${ok?"ACTIVE":"EXPIRED"}</span><br>
+<b>Expiry:</b> ${ex.toLocaleString()}<br>
+<b>Days remaining:</b> ${days}`,
+`Status: ${ok?"ACTIVE":"EXPIRED"}\nExpiry: ${ex}\nDays: ${days}`
+);
+}
 
-  function hostFromInput(v){
-    v = trim(v);
-    if (!v) return "";
+document.getElementById("parseBtn").onclick=()=>{
+try{render(JSON.parse(jsonPaste.value));}
+catch{ text("Invalid JSON");}
+};
 
-    var lower = v.toLowerCase();
-    if (lower.startsWith("http://")) v = v.slice(7);
-    else if (lower.startsWith("https://")) v = v.slice(8);
+document.getElementById("checkBtn").onclick=async()=>{
+fallback.style.display="none";
+const h=host(server.value);
+const u=trim(username.value);
+const p=trim(password.value);
 
-    var slash = v.indexOf("/");
-    if (slash !== -1) v = v.slice(0, slash);
+if(!h||!u||!p){text("Fill all fields");return;}
 
-    v = v.replace(/\/+$/, "");
-    return v;
-  }
+lastHost=h;lastUser=u;lastPass=p;
 
-  function buildApiUrl(scheme, host, user, pass){
-    return scheme + "://" + host + "/player_api.php?username=" + encodeURIComponent(user) +
-           "&password=" + encodeURIComponent(pass) + "&_=" + Date.now();
-  }
-
-  function showFallback(message, host, user, pass){
-    fallback.style.display = "block";
-    fallbackMsg.textContent = message;
-
-    lastBuiltHost = host;
-    lastUser = user;
-    lastPass = pass;
-
-    openHttpsBtn.disabled = !host || !user || !pass;
-    openHttpBtn.disabled  = !host || !user || !pass;
-  }
-
-  function hideFallback(){
-    fallback.style.display = "none";
-    fallbackMsg.textContent = "";
-  }
-
-  function connMessage(activeCons, maxCons){
-    if (activeCons === null || maxCons === null) {
-      return { html:"<b>Connections:</b> Unknown<br>", text:"Connections: Unknown\n" };
-    }
-    var a = parseInt(activeCons, 10), m = parseInt(maxCons, 10);
-    if (!isFinite(a) || !isFinite(m)) {
-      return { html:"<b>Connections:</b> Unknown<br>", text:"Connections: Unknown\n" };
-    }
-    var reached = (m > 0 && a >= m);
-    var statusHtml = reached ? '<span class="warn">LIMIT REACHED</span>' : '<span class="ok">OK</span>';
-    return {
-      html: "<b>Connections:</b> " + a + " active / " + m + " max — " + statusHtml + "<br>",
-      text: "Connections: " + a + " active / " + m + " max — " + (reached ? "LIMIT REACHED" : "OK") + "\n"
-    };
-  }
-
-  function renderFromData(data){
-    var ui = (data && data.user_info) ? data.user_info : null;
-    var exp = (ui && ui.exp_date) ? ui.exp_date : null;
-    var status = (ui && ui.status) ? ui.status : "Unknown";
-    var activeCons = (ui && ui.active_cons !== undefined) ? ui.active_cons : null;
-    var maxCons = (ui && ui.max_connections !== undefined) ? ui.max_connections : null;
-
-    if (!exp || exp === "0"){
-      setOutputText("Could not find user_info.exp_date in response.");
-      return;
-    }
-
-    var expiryDate = unixToLocal(exp);
-    if (!expiryDate){
-      setOutputText("exp_date found but could not convert: " + exp);
-      return;
-    }
-
-    var days = Math.floor((expiryDate.getTime() - Date.now()) / 86400000);
-    var active = days >= 0;
-
-    var conn = connMessage(activeCons, maxCons);
-
-    var plain =
-      "Status: " + (active ? "ACTIVE" : "EXPIRED") + "\n" +
-      "API status: " + status + "\n" +
-      conn.text +
-      "Expiry date: " + expiryDate.toLocaleString() + "\n" +
-      "Days remaining: " + days;
-
-    var html =
-      "<b>Status:</b> " + (active ? '<span class="ok">ACTIVE</span>' : '<span class="bad">EXPIRED</span>') + "<br>" +
-      "<b>API status:</b> " + status + "<br>" +
-      conn.html +
-      "<b>Expiry date:</b> " + expiryDate.toLocaleString() + "<br>" +
-      "<b>Days remaining:</b> " + days;
-
-    var a = parseInt(activeCons, 10);
-    var m = parseInt(maxCons, 10);
-    if (isFinite(a) && isFinite(m) && m > 0 && a >= m) {
-      html += "<br><b>Note:</b> If streams are failing, a connection limit may be blocking additional devices.";
-      plain += "\n\nNote: If streams are failing, a connection limit may be blocking additional devices.";
-    }
-
-    setOutputHTML(html, plain);
-  }
-
-  async function check(){
-    btn.disabled = true;
-    setOutputText("Checking…");
-    hideFallback();
-
-    try{
-      var host = hostFromInput(document.getElementById("server").value);
-      var user = trim(document.getElementById("username").value);
-      var pass = trim(document.getElementById("password").value);
-
-      if (!host || !user || !pass){
-        setOutputText("Please fill in Server URL, Username and Password.");
-        return;
-      }
-
-      // Always try HTTPS first (works from GitHub Pages)
-      var httpsUrl = buildApiUrl("https", host, user, pass);
-
-      var res = await fetch(httpsUrl, { method:"GET", cache:"no-store" });
-      var text = await res.text();
-
-      if (!res.ok){
-        // If HTTPS returns an actual HTTP error, show fallback with both links
-        showFallback(
-          "HTTPS request returned HTTP " + res.status + ". If this provider is HTTP-only, open the API URL and paste the JSON below.",
-          host, user, pass
-        );
-        setOutputText("HTTPS returned HTTP " + res.status + " " + res.statusText + ". See fallback options below.");
-        return;
-      }
-
-      var data;
-      try{
-        text = (text || "").replace(/^\uFEFF/, "").trim();
-        data = JSON.parse(text);
-      }catch(e){
-        showFallback(
-          "Response was not valid JSON (often a block/HTML page). Open the API URL and paste the JSON below.",
-          host, user, pass
-        );
-        setOutputText("Response was not valid JSON. See fallback options below.");
-        return;
-      }
-
-      renderFromData(data);
-
-    }catch(e){
-      // Most common here is CORS or network error
-      var host = hostFromInput(document.getElementById("server").value);
-      var user = trim(document.getElementById("username").value);
-      var pass = trim(document.getElementById("password").value);
-
-      showFallback(
-        "Browser blocked the direct check (often CORS or mixed-content). Use “Open API URL” then paste the JSON below.",
-        host, user, pass
-      );
-
-      setOutputText(
-        "Error: " + (e && e.message ? e.message : String(e)) + "\n\n" +
-        "See fallback options below."
-      );
-    }finally{
-      btn.disabled = false;
-    }
-  }
-
-  btn.addEventListener("click", check);
-
-  openHttpsBtn.addEventListener("click", function(){
-    var url = buildApiUrl("https", lastBuiltHost, lastUser, lastPass);
-    window.open(url, "_blank", "noopener,noreferrer");
-  });
-
-  openHttpBtn.addEventListener("click", function(){
-    var url = buildApiUrl("http", lastBuiltHost, lastUser, lastPass);
-    window.open(url, "_blank", "noopener,noreferrer");
-  });
-
-  parseBtn.addEventListener("click", function(){
-    var t = trim(jsonPaste.value);
-    if (!t){ setOutputText("Paste the JSON response first."); return; }
-
-    try{
-      t = t.replace(/^\uFEFF/, "").trim();
-      var data = JSON.parse(t);
-      renderFromData(data);
-      setOutputText(out.textContent + "\n\n(Parsed from pasted JSON.)");
-    }catch(e){
-      setOutputText("Could not parse pasted text as JSON.");
-    }
-  });
-
-  clearPasteBtn.addEventListener("click", function(){
-    jsonPaste.value = "";
-    setOutputText("Ready.");
-  });
-
-  copyBtn.addEventListener("click", async function(){
-    var text = trim(lastResultText || out.textContent || "");
-    if (!text) text = "No result to copy.";
-    try {
-      await navigator.clipboard.writeText(text);
-      setOutputText("Copied result to clipboard.\n\n" + text);
-    } catch(e) {
-      setOutputText("Could not access clipboard. Please select and copy manually.\n\n" + text);
-    }
-  });
-
-  resetBtn.addEventListener("click", function(){
-    document.getElementById("server").value = "cf.1575-cdn.me";
-    document.getElementById("username").value = "";
-    document.getElementById("password").value = "";
-    jsonPaste.value = "";
-    hideFallback();
-    setOutputText("Ready.");
-  });
+try{
+const r=await fetch(api("https",h,u,p));
+const t=await r.text();
+render(JSON.parse(t));
+}catch(e){
+fallback.style.display="block";
+fallbackMsg.textContent="Browser blocked direct check.";
+text("Direct check failed. Use fallback.");
+}
+};
 
 })();
 </script>
+
 </body>
 </html>
